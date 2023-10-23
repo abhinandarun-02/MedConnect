@@ -14,15 +14,30 @@ enum UserRole {
 }
 
 model User {
-  id       String   @id @unique @default(uuid())
-  name     String
-  email    String   @unique @db.Text
-  phone_no String   @unique
-  role     UserRole
+  id        String   @id
+  username  String   @unique
+  name      String
+  firstName String
+  lastName  String
+  imageUrl  String?
+  email     String   @unique
+  role      UserRole
+
+  participant Participant[]
+  Message     Message[]
+
+  patient Patient?
+  doctor  Doctor?
+  admin   Admin?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Patient {
-  userId  String @unique
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
   place   String
   address String
   height  Float?
@@ -30,12 +45,50 @@ model Patient {
 }
 
 model Doctor {
-  userId         String @unique
-  doctorId       String @id @unique @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+
   specialization String
+  hospital       String
 }
 
 model Admin {
-  userId  String @unique
-  adminId String @id @unique @default(uuid())
+  userId String @unique
+  user   User   @relation(fields: [userId], references: [id])
+}
+
+model Conversation {
+  id          String        @id @default(uuid())
+  createdAt   DateTime      @default(now())
+  partcipants Participant[]
+  Message     Message[]
+
+  @@index([createdAt])
+}
+
+model Participant {
+  id             String       @id @default(uuid())
+  userId         String
+  user           User         @relation(fields: [userId], references: [id])
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+
+  @@index([conversationId])
+  @@index([userId])
+}
+
+model Message {
+  id             String       @id @default(uuid())
+  conversationId String
+  conversation   Conversation @relation(fields: [conversationId], references: [id])
+  senderId       String
+  sender         User         @relation(fields: [senderId], references: [id])
+  content        String
+  isRead         Boolean      @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([conversationId])
+  @@index([senderId])
 }
