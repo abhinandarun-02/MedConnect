@@ -80,3 +80,18 @@ body,
     @apply bg-background text-foreground;
   }
 }
+.cl-rootBox {
+  @apply w-full;
+}
+.cl-card {
+  @apply shadow-none;
+  @apply w-auto;
+  @apply max-w-none;
+}
+.cl-scrollBox {
+  @apply h-screen;
+  @apply rounded-none;
+}
+.cl-navbar {
+  @apply hidden;
+}
