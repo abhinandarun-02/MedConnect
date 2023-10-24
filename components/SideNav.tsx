@@ -34,7 +34,7 @@ const routes = [
     label: 'Doctors',
     icon: HeartPulse,
     href: '/doctors',
-    disabled: true,
+    disabled: false,
   },
   {
     label: 'Appointments',
