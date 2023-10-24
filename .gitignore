@@ -4,6 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
+backend/venv/
+backend/myenv/
 
 # testing
 /coverage
@@ -39,4 +41,3 @@ next-env.d.ts
 .vscode
 .idea
 
-venv
