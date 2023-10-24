@@ -98,3 +98,13 @@ model Message {
   @@index([conversationId])
   @@index([senderId])
 }
+
+model Diseases {
+  id          Int     @id @default(autoincrement())
+  disease     String
+  description String?
+  causes      String?
+  remedies    String?
+
+  @@index([disease])
+}
