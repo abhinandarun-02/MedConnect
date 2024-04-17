@@ -20,6 +20,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
 import { toast } from './ui/use-toast'
 import { Separator } from './ui/separator'
+import { ToastAction } from './ui/toast'
 
 const FormSchema = z.object({
   symptoms: z
@@ -44,30 +45,40 @@ export function PredictionForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const response = await axios.get(
-      `http://127.0.0.1:5000/predict?symptoms=${data.symptoms}`
-    )
-    const responseData = response.data
-    const diseaseResponse = await axios.get(
-      `http://localhost:3000/predict/${responseData.prediction}`
-    )
+    try {
+      const response = await axios.get(
+        `http://127.0.0.1:5000/predict?symptoms=${data.symptoms}`
+      )
+      const responseData = response.data
+      const diseaseResponse = await axios.get(
+        `http://localhost:3000/predict/${responseData.prediction}`
+      )
 
-    const diseaseData = diseaseResponse.data
+      const diseaseData = diseaseResponse.data
 
-    setIsLoading(true)
-    toast({
-      description: 'Submitted Successfully',
-    })
-    setTimeout(() => {
-      setIsLoading(false)
-      setDisease(responseData.prediction)
-      if (diseaseData[0]?.description) {
-        setDescription(diseaseData[0].description)
-        setRemedies(diseaseData[0].remedies)
-        setCauses(diseaseData[0].causes)
-        console.log(diseaseData[0])
-      }
-    }, 2000)
+      setIsLoading(true)
+      toast({
+        description: 'Submitted Successfully',
+      })
+      setTimeout(() => {
+        setIsLoading(false)
+        setDisease(responseData.prediction)
+        if (diseaseData[0]?.description) {
+          setDescription(diseaseData[0].description)
+          setRemedies(diseaseData[0].remedies)
+          setCauses(diseaseData[0].causes)
+          console.log(diseaseData[0])
+        }
+      }, 2000)
+    } catch (error) {
+      console.error(error)
+      toast({
+        variant: "destructive",
+        title: "Uh oh! Something went wrong.",
+        description: "There was a problem with your request.",
+        action: <ToastAction altText="Try again">Try Again</ToastAction>,
+      })
+    }
   }
 
   return (
