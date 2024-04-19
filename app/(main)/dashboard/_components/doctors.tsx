@@ -45,7 +45,7 @@ async function DoctorList() {
       {doctors.map((doctor) => (
         <Link
           key={doctor.id}
-          href={`dashboard/doctors/${doctor.username}`}
+          href={`doctors/${doctor.username}`}
           className="group flex h-32 w-full items-center justify-between gap-6 rounded-md  p-4 shadow-sm bg-slate-50  border border-border md:max-w-[400px]"
         >
           <div className="m mx-0  my-auto h-[72px] w-[72px] overflow-hidden rounded-full">
