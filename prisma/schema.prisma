@@ -8,83 +8,82 @@ datasource db {
 }
 
 model User {
-  id          String        @id
-  username    String        @unique
-  name        String
-  firstName   String
-  lastName    String
-  imageUrl    String?
-  email       String        @unique
-  role        UserRole
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  admin       Admin?
-  doctor      Doctor?
-  Message     Message[]
-  participant Participant[]
-  patient     Patient?
+  id            String    @id @default(cuid())
+  name          String
+  username      String    @unique
+  email         String    @unique
+  emailVerified DateTime?
+  image         String?
+  role          String?
+  Doctor        Doctor?
+  Patient       Patient?
+  Admin         Admin?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
 }
 
 model Patient {
-  id      String @id @default(uuid())
-  userId  String @unique
-  place   String
-  address String
-  height  Float?
-  weight  Float?
-  user    User   @relation(fields: [userId], references: [id])
+  id          Int           @id @default(autoincrement())
+  name        String?
+  username    String?       @unique
+  height      Float?
+  weight      Float?
+  address     String?
+  bloodType   String?
+  user        User          @relation(fields: [userId], references: [id])
+  userId      String        @unique
+  Appointment Appointment[]
 }
 
 model Doctor {
-  id          String @id @default(uuid())
-  userId      String @unique
-  bio         String
-  speciality  String
-  rating      Float
-  noOfReviews Int
-  hospital    String
-  user        User   @relation(fields: [userId], references: [id])
+  id           Int           @id @default(autoincrement())
+  name         String
+  username     String        @unique
+  speciality   String
+  gender       String?
+  image        String?
+  location     String
+  experience   Int
+  verified     Boolean
+  languages    String[]
+  rating       Float
+  reviews      Int
+  endorsements Int
+  user         User?         @relation(fields: [userId], references: [id])
+  userId       String?       @unique
+  Appointment  Appointment[]
+
+  @@index([username])
+}
+
+model Appointment {
+  id String @id @default(uuid())
+
+  patientId Int
+  patient   Patient @relation(fields: [patientId], references: [id])
+  doctorId  Int
+  doctor    Doctor  @relation(fields: [doctorId], references: [id])
+
+  date      DateTime
+  slot      String
+  amount    Float
+  completed Boolean  @default(false)
+  isPaid    Boolean  @default(false)
+  phone     String   @default("")
+  address   String   @default("")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([patientId])
+  @@index([doctorId])
 }
 
 model Admin {
-  id     String @id @default(uuid())
-  userId String @unique
-  user   User   @relation(fields: [userId], references: [id])
-}
-
-model Conversation {
-  id          String        @id @default(uuid())
-  createdAt   DateTime      @default(now())
-  Message     Message[]
-  partcipants Participant[]
-
-  @@index([createdAt])
-}
-
-model Participant {
-  id             String       @id @default(uuid())
-  userId         String
-  conversationId String
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-  user           User         @relation(fields: [userId], references: [id])
-
-  @@index([conversationId])
-  @@index([userId])
-}
-
-model Message {
-  id             String       @id @default(uuid())
-  conversationId String
-  senderId       String
-  content        String
-  isRead         Boolean      @default(false)
-  createdAt      DateTime     @default(now())
-  updatedAt      DateTime     @updatedAt
-  conversation   Conversation @relation(fields: [conversationId], references: [id])
-  sender         User         @relation(fields: [senderId], references: [id])
-
-  @@index([conversationId])
-  @@index([senderId])
+  id       String  @id @default(uuid())
+  username String  @unique
+  user     User?   @relation(fields: [userId], references: [id])
+  userId   String? @unique
 }
 
 model Diseases {

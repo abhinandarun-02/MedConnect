@@ -11,7 +11,7 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <main className="flex font-mono">
+    <main className="flex">
       <div className="sidebar fixed hidden h-screen w-[300px] flex-col bg-card drop-shadow-sm md:flex">
         <SideBar />
       </div>
