@@ -19,6 +19,8 @@ import {
 import { Textarea } from '@/components/ui/textarea'
 import { Loader2 } from 'lucide-react'
 import { toast } from './ui/use-toast'
+import { Separator } from './ui/separator'
+import { ToastAction } from './ui/toast'
 
 const FormSchema = z.object({
   symptoms: z
@@ -36,22 +38,66 @@ export function PredictionForm() {
     resolver: zodResolver(FormSchema),
   })
 
-  const [disease, setDisease] = useState<string | null>(null)
+  const [disease, setDisease] = useState<string>('Not Found')
+  const [description, setDescription] = useState<string>('Not Found')
+  const [remedies, setRemedies] = useState<string>('Not Found')
+  const [causes, setCauses] = useState<string>('Not Found')
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const response = await axios.get(
-      `http://127.0.0.1:5000/predict?symptoms=${data.symptoms}`
-    )
-    const responseData = response.data
-    setIsLoading(true)
-    toast({
-      description: 'Submitted Successfully',
-    })
-    setTimeout(() => {
-      setIsLoading(false)
-      setDisease(responseData.prediction)
-    }, 2000)
+    const origin = true
+      ? 'https://mutually-live-fox.ngrok-free.app'
+      : 'http://127.0.0.1:5000'
+
+    try {
+      const response = await axios.get(
+        `${origin}/predict?symptoms=${data.symptoms}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': '64267',
+          },
+        }
+      )
+      const responseData = response.data
+      if (!responseData.prediction) {
+        return
+      }
+      const diseaseResponse = await axios.get(
+        `/predict/${responseData.prediction}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': '64267',
+          },
+        }
+      )
+
+      const diseaseData = diseaseResponse.data
+
+      setIsLoading(true)
+      toast({
+        description: 'Submitted Successfully',
+      })
+      setTimeout(() => {
+        setIsLoading(false)
+        setDisease(responseData.prediction)
+        if (diseaseData[0]?.description) {
+          setDescription(diseaseData[0].description)
+          setRemedies(diseaseData[0].remedies)
+          setCauses(diseaseData[0].causes)
+          console.log(diseaseData[0])
+        }
+      }, 2000)
+    } catch (error) {
+      console.error(error)
+      toast({
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'There was a problem with your request.',
+        action: <ToastAction altText="Try again">Try Again</ToastAction>,
+      })
+    }
   }
 
   return (
@@ -90,16 +136,22 @@ export function PredictionForm() {
       </Form>
       {disease && (
         <div className="mt-8 flex flex-col gap-4">
-          <h2 className="text-2xl font-medium">Prediction : {disease}</h2>
-          <h3 className="text-lg">
-            An allergy is when your immune system reacts unusually to certain
-            substances that are typically harmless, like pollen, dust, or
-            certain foods. When your body encounters these substances, it
-            overreacts, causing symptoms like sneezing, itching, or a rash. Its
-            important to identify your specific triggers and work with a
-            healthcare provider to manage your allergies effectively and improve
-            your quality of life.
-          </h3>
+          <h2 className="text-4xl font-medium">Prediction : {disease}</h2>
+          <div className="text-lg ">
+            <h2 className="text-2xl font-semibold">Description</h2>
+            <Separator />
+            <div>{description}</div>
+          </div>
+          <div className="text-lg ">
+            <h2 className="text-2xl font-semibold">Remedies</h2>
+            <Separator />
+            <div>{remedies}</div>
+          </div>
+          <div className="text-lg">
+            <h2 className="text-2xl font-semibold">Causes</h2>
+            <Separator />
+            <div>{causes}</div>
+          </div>
         </div>
       )}
     </>

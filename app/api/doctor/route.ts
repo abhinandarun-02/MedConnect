@@ -14,8 +14,6 @@ export async function GET(req: NextRequest) {
       return new NextResponse("Unauthorized", { status: 403 });
     }
 
-    const page = req.nextUrl.searchParams.get("page");
-
     let specialityCode = req.nextUrl.searchParams.get("speciality");
     const specialityMap = new Map([
       ["all", undefined],
