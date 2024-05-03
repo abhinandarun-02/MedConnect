@@ -3,18 +3,27 @@ import { PredictionForm } from '@/components/prediction-form'
 import axios from 'axios'
 import { redirect } from 'next/navigation'
 
+const SERVER_RESPONSE = 'hello world'
+
 export default async function Prediction() {
   const origin =
     process.env.NODE_ENV === 'production'
-      ? 'https://mutually-live-fox.ngrok-free.app'
-      : 'http://127.0.0.1:5000'
-  const response = await axios.get(origin, {
-    headers: {
-      'Content-Type': 'application/json',
-      'ngrok-skip-browser-warning': '64267',
-    },
-  })
-  if (response.data?.res != 'hello world') {
+      ? 'https://mutually-live-fox.ngrok-free.app/'
+      : 'http://127.0.0.1:5000/'
+
+  try {
+    const response = await axios.get(origin, {
+      headers: {
+        'Content-Type': 'application/json',
+        'ngrok-skip-browser-warning': '64267',
+      },
+    })
+
+    if (response.data?.res !== SERVER_RESPONSE) {
+      redirect('/')
+    }
+  } catch (error) {
+    console.error('Error fetching from server:', error)
     redirect('/')
   }
 
