@@ -45,13 +45,32 @@ export function PredictionForm() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
+    const origin = true
+      ? 'https://mutually-live-fox.ngrok-free.app'
+      : 'http://127.0.0.1:5000'
+
     try {
       const response = await axios.get(
-        `http://127.0.0.1:5000/predict?symptoms=${data.symptoms}`
+        `${origin}/predict?symptoms=${data.symptoms}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': '64267',
+          },
+        }
       )
       const responseData = response.data
+      if (!responseData.prediction) {
+        return
+      }
       const diseaseResponse = await axios.get(
-        `http://localhost:3000/predict/${responseData.prediction}`
+        `/predict/${responseData.prediction}`,
+        {
+          headers: {
+            'Content-Type': 'application/json',
+            'ngrok-skip-browser-warning': '64267',
+          },
+        }
       )
 
       const diseaseData = diseaseResponse.data
@@ -73,9 +92,9 @@ export function PredictionForm() {
     } catch (error) {
       console.error(error)
       toast({
-        variant: "destructive",
-        title: "Uh oh! Something went wrong.",
-        description: "There was a problem with your request.",
+        variant: 'destructive',
+        title: 'Uh oh! Something went wrong.',
+        description: 'There was a problem with your request.',
         action: <ToastAction altText="Try again">Try Again</ToastAction>,
       })
     }
