@@ -11,7 +11,7 @@ export default function NavBar() {
     <div className="flex w-full items-center justify-between px-6 py-4 md:hidden">
       <div className="header flex items-center justify-center gap-4 text-xl font-bold">
         <Image src={Logo} width={40} height={40} alt="Medconnect Logo" />
-        <h2 className={roboto.className}>MedConnect</h2>
+        <h2 className={roboto.className}>Health Connect</h2>
       </div>
       <MobileSideBar />
     </div>

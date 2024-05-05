@@ -12,7 +12,7 @@ export const SideBar = () => {
         href="/dashboard"
         className="header flex items-center justify-center gap-4 text-xl font-bold "
       >
-        <Image src={Logo} width={40} height={40} alt="Medconnect Logo" />
+        <Image src={Logo} width={40} height={40} alt="Health Connect Logo" />
         <h2>Health Connect</h2>
       </Link>
       <div className="mx-4">
