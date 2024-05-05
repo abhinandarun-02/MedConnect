@@ -43,11 +43,13 @@ export function PredictionForm() {
   const [remedies, setRemedies] = useState<string>('Not Found')
   const [causes, setCauses] = useState<string>('Not Found')
   const [isLoading, setIsLoading] = useState<boolean>(false)
+  const [isFetched, setIsFetched] = useState<boolean>(false)
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const origin = true
-      ? 'https://mutually-live-fox.ngrok-free.app'
-      : 'http://127.0.0.1:5000'
+    const origin =
+      process.env.NODE_ENV === 'production'
+        ? 'https://mutually-live-fox.ngrok-free.app'
+        : 'http://127.0.0.1:5000'
 
     try {
       const response = await axios.get(
@@ -86,8 +88,8 @@ export function PredictionForm() {
           setDescription(diseaseData[0].description)
           setRemedies(diseaseData[0].remedies)
           setCauses(diseaseData[0].causes)
-          console.log(diseaseData[0])
         }
+        setIsFetched(true)
       }, 2000)
     } catch (error) {
       console.error(error)
@@ -127,14 +129,14 @@ export function PredictionForm() {
           <Button
             type="submit"
             disabled={isLoading}
-            className="gap-2 hover:scale-105 hover:bg-black"
+            className="gap-2 px-8 py-5 text-sm hover:scale-105"
           >
             {isLoading && <Loader2 className="animate-spin" />}
             Predict
           </Button>
         </form>
       </Form>
-      {disease && (
+      {isFetched && (
         <div className="mt-8 flex flex-col gap-4">
           <h2 className="text-4xl font-medium">Prediction : {disease}</h2>
           <div className="text-lg ">
