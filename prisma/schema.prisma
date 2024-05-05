@@ -92,6 +92,7 @@ model Diseases {
   description String?
   causes      String?
   remedies    String?
+  speciality  String?
 
   @@index([disease])
 }
