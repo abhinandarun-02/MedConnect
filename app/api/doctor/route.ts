@@ -24,6 +24,9 @@ export async function GET(req: NextRequest) {
         speciality: speciality ? { equals: speciality } : undefined,
         gender: gender ? { equals: gender } : undefined,
       },
+      orderBy: {
+        willson_score: 'desc',
+      },
     })
 
     return NextResponse.json(doctors)
