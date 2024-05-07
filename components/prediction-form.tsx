@@ -42,9 +42,9 @@ export function PredictionForm() {
   })
 
   const [disease, setDisease] = useState<Diseases>()
-  const [description, setDescription] = useState<string>('Not Found')
-  const [remedies, setRemedies] = useState<string>('Not Found')
-  const [causes, setCauses] = useState<string>('Not Found')
+  const [description, setDescription] = useState<string | null>('Not Found')
+  const [remedies, setRemedies] = useState<string | null>('Not Found')
+  const [causes, setCauses] = useState<string | null>('Not Found')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isFetched, setIsFetched] = useState<boolean>(false)
   const [doctors, setDoctors] = useState<Doctor[]>([])
@@ -59,7 +59,7 @@ export function PredictionForm() {
 
     try {
       const response = await axios.get(
-        `${ml_origin}/predict?symptoms=${data.symptoms}`,
+        `${ml_origin}/predict?symptoms=${data.symptoms.replace(' ', '')}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -81,7 +81,7 @@ export function PredictionForm() {
         }
       )
 
-      const diseaseData = diseaseResponse.data
+      const diseaseData = diseaseResponse.data[0] as Diseases
 
       setIsLoading(true)
       toast({
@@ -89,15 +89,15 @@ export function PredictionForm() {
       })
       setTimeout(async () => {
         setIsLoading(false)
-        setDisease(diseaseData[0] as Diseases)
+        setDisease(diseaseData)
         const doctorsResponse = await axios.get(`${origin}/api/doctor`, {
-          params: { speciality: disease?.speciality },
+          params: { speciality: diseaseData?.speciality },
         })
         setDoctors(doctorsResponse.data.slice(0, 2) as Doctor[])
-        if (diseaseData[0]?.description) {
-          setDescription(diseaseData[0].description)
-          setRemedies(diseaseData[0].remedies)
-          setCauses(diseaseData[0].causes)
+        if (diseaseData?.description) {
+          setDescription(diseaseData?.description)
+          setRemedies(diseaseData?.remedies)
+          setCauses(diseaseData?.causes)
         }
         setIsFetched(true)
       }, 2000)
