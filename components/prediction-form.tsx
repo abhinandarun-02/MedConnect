@@ -21,6 +21,9 @@ import { Loader2 } from 'lucide-react'
 import { toast } from './ui/use-toast'
 import { Separator } from './ui/separator'
 import { ToastAction } from './ui/toast'
+import { DoctorCard } from '@/app/(main)/doctors/_components/card'
+import { Diseases, Doctor } from '@prisma/client'
+import { useOrigin } from '@/lib/hooks/use-origin'
 
 const FormSchema = z.object({
   symptoms: z
@@ -38,22 +41,25 @@ export function PredictionForm() {
     resolver: zodResolver(FormSchema),
   })
 
-  const [disease, setDisease] = useState<string>('Not Found')
+  const [disease, setDisease] = useState<Diseases>()
   const [description, setDescription] = useState<string>('Not Found')
   const [remedies, setRemedies] = useState<string>('Not Found')
   const [causes, setCauses] = useState<string>('Not Found')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [isFetched, setIsFetched] = useState<boolean>(false)
+  const [doctors, setDoctors] = useState<Doctor[]>([])
+
+  const origin = useOrigin()
 
   async function onSubmit(data: z.infer<typeof FormSchema>) {
-    const origin =
+    const ml_origin =
       process.env.NODE_ENV === 'production'
         ? 'https://mutually-live-fox.ngrok-free.app'
         : 'http://127.0.0.1:5000'
 
     try {
       const response = await axios.get(
-        `${origin}/predict?symptoms=${data.symptoms}`,
+        `${ml_origin}/predict?symptoms=${data.symptoms}`,
         {
           headers: {
             'Content-Type': 'application/json',
@@ -81,9 +87,13 @@ export function PredictionForm() {
       toast({
         description: 'Submitted Successfully',
       })
-      setTimeout(() => {
+      setTimeout(async () => {
         setIsLoading(false)
-        setDisease(responseData.prediction)
+        setDisease(diseaseData[0] as Diseases)
+        const doctorsResponse = await axios.get(`${origin}/api/doctor`, {
+          params: { speciality: disease?.speciality },
+        })
+        setDoctors(doctorsResponse.data.slice(0, 2) as Doctor[])
         if (diseaseData[0]?.description) {
           setDescription(diseaseData[0].description)
           setRemedies(diseaseData[0].remedies)
@@ -136,9 +146,17 @@ export function PredictionForm() {
           </Button>
         </form>
       </Form>
+      <div className="grid grid-cols-2">
+        {doctors.length > 0 &&
+          doctors.map((doctor, index) => (
+            <DoctorCard key={index} doctor={doctor} />
+          ))}
+      </div>
       {isFetched && (
         <div className="mt-8 flex flex-col gap-4">
-          <h2 className="text-4xl font-medium">Prediction : {disease}</h2>
+          <h2 className="text-4xl font-medium">
+            Prediction : {disease?.disease}
+          </h2>
           <div className="text-lg ">
             <h2 className="text-2xl font-semibold">Description</h2>
             <Separator />
